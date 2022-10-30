@@ -43,6 +43,7 @@ function Conversation() {
     
     function encryptMessage(){
         const enrypted = encryptor.encrypt(message)
+        console.log(enrypted)
         if(enrypted) setEncryptedMessage(enrypted)
     }    
 
@@ -53,12 +54,13 @@ function Conversation() {
 
     return(
         <div>
+            <input type="text" onChange={e => setMessage(e.target.value)} />
             <div onClick={encryptMessage}>
                 Encrypt!
             </div>
 
             <div onClick={decryptMessage}>
-                Encrypt!
+                Decrypt!
             </div>
         </div>
         
