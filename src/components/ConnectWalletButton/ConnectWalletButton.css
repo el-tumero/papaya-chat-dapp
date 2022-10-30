@@ -1,0 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik&display=swap');
+.button {
+    user-select: none;
+    cursor: pointer;
+
+    font-family: 'Rubik', sans-serif;
+    font-size: 48px;
+    background-color: orange;
+    text-align: center;
+
+    border-radius: 10px;
+    padding-block: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+
+    color: rgb(255, 241, 214);
+    box-shadow: 0 0 0 1px dimgray, 0 25px 0 0 rgb(230, 170, 60);
+
+    transition: 0.05s;    
+}
+
+.button:hover {
+    background-color: rgb(200, 130, 0);    
+}
+
+.button:active {
+    transform: translateY(5px);
+    box-shadow: 0 0 0 1px dimgray, 0 10px 0 0 rgb(230, 170, 60);
+}

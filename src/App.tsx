@@ -1,25 +1,35 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useEffect, useState } from 'react';
+import ConnectWalletButton from './components/ConnectWalletButton/ConnectWalletButton';
+import Conversation from './components/Conversation';
+
 import './App.css';
 
+
+
 function App() {
+
+  const [account, setAccount] = useState<string>()
+  const [isLogged, setIsLogged] = useState<boolean>(false)
+
+  useEffect(() => {
+    if(account) setIsLogged(true)
+  }, [account])
+
+
   return (
-    <div className="App">
+      <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        {isLogged &&
+          <Conversation />
+        }
+        {!isLogged &&
+          <ConnectWalletButton setAccount={setAccount}></ConnectWalletButton>
+        }
+        
       </header>
     </div>
+
+    
   );
 }
 
