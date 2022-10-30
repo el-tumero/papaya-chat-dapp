@@ -18,6 +18,9 @@
 .env.test.local
 .env.production.local
 
+/artifacts
+/cache
+
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
