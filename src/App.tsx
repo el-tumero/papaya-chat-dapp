@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import ConnectWalletButton from './components/ConnectWalletButton/ConnectWalletButton';
-import Conversation from './components/Conversation';
+import KeyPair from './components/KeyPair';
+
 
 import './App.css';
-
-
+import { Signer } from 'ethers';
 
 function App() {
 
   const [account, setAccount] = useState<string>()
+  const [signer, setSigner] = useState<Signer>()
   const [isLogged, setIsLogged] = useState<boolean>(false)
 
   useEffect(() => {
@@ -20,10 +21,10 @@ function App() {
       <div className="App">
       <header className="App-header">
         {isLogged &&
-          <Conversation />
+          <KeyPair signer={signer} />
         }
         {!isLogged &&
-          <ConnectWalletButton setAccount={setAccount}></ConnectWalletButton>
+          <ConnectWalletButton setAccount={setAccount} setSigner={setSigner}></ConnectWalletButton>
         }
         
       </header>

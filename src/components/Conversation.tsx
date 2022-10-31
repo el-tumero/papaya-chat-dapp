@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import {JSEncrypt} from "jsencrypt"
+import LZString from "lz-string"
 
 function Conversation() {
     
@@ -17,6 +18,14 @@ function Conversation() {
         xFxdU6jE0NQ+Z+zEdhUTooNRaY5nZiu5PgDB0ED/ZKBUSLKL7eibMxZtMlUDHjm4
         gwQco1KRMDSmXSMkDwIDAQAB
         -----END PUBLIC KEY-----`;
+
+        const compressedPublicKey = LZString.compress(publicKey)
+        // const omgDecompressed = LZString.decompress(omg)
+
+        //console.log(omgDecompressed)
+
+        // console.log(omg.length, publicKey.length)
+
 
         encryptor.setPublicKey(publicKey)
     }, [encryptor])

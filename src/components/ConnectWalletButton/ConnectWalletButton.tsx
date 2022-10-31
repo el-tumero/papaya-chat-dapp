@@ -1,5 +1,5 @@
 import "./ConnectWalletButton.css"
-import { ethers } from "ethers"
+import { ethers, Signer } from "ethers"
 import { SetStateAction } from "react"
 
 declare global {
@@ -10,17 +10,21 @@ declare global {
 
 interface Props {
   setAccount: React.Dispatch<SetStateAction<string | undefined>>
+  setSigner: React.Dispatch<SetStateAction<Signer | undefined>>
 }
 
-function ConnectWalletButton({setAccount}:Props) {
+function ConnectWalletButton({setAccount, setSigner}:Props) {
 
   async function handleClick(){
     if(window.ethereum){
       try {
           const provider = new ethers.providers.Web3Provider(window.ethereum)
-          let accounts = await provider.send("eth_requestAccounts", []) as string[]
+          const accounts = await provider.send("eth_requestAccounts", []) as string[]
+          const signer = provider.getSigner()
 
           setAccount(accounts[0])
+          setSigner(signer)
+
 
           console.log("Wallet connected!")
 
