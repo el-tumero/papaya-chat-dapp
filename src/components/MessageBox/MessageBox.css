@@ -1,0 +1,20 @@
+.text{
+    font-size: 15px;
+}
+
+.messages{
+    height: 30vh;
+    text-align: left;
+    padding-left: 10px;
+    /* width: ; */
+    background-color: aliceblue;
+}
+
+.message{
+    font-size: 13px;
+    color: black;
+}
+
+.input{
+    width: 70ch;
+}

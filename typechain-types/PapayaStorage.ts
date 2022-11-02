@@ -24,14 +24,22 @@ import type {
 
 export interface PapayaStorageInterface extends utils.Interface {
   functions: {
+    "checkIfAddressIsInitialized()": FunctionFragment;
     "getPublicKey(address)": FunctionFragment;
     "setPublicKey(string)": FunctionFragment;
   };
 
   getFunction(
-    nameOrSignatureOrTopic: "getPublicKey" | "setPublicKey"
+    nameOrSignatureOrTopic:
+      | "checkIfAddressIsInitialized"
+      | "getPublicKey"
+      | "setPublicKey"
   ): FunctionFragment;
 
+  encodeFunctionData(
+    functionFragment: "checkIfAddressIsInitialized",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "getPublicKey",
     values: [PromiseOrValue<string>]
@@ -41,6 +49,10 @@ export interface PapayaStorageInterface extends utils.Interface {
     values: [PromiseOrValue<string>]
   ): string;
 
+  decodeFunctionResult(
+    functionFragment: "checkIfAddressIsInitialized",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "getPublicKey",
     data: BytesLike
@@ -80,6 +92,8 @@ export interface PapayaStorage extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
+    checkIfAddressIsInitialized(overrides?: CallOverrides): Promise<[boolean]>;
+
     getPublicKey(
       _address: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -90,6 +104,8 @@ export interface PapayaStorage extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
   };
+
+  checkIfAddressIsInitialized(overrides?: CallOverrides): Promise<boolean>;
 
   getPublicKey(
     _address: PromiseOrValue<string>,
@@ -102,6 +118,8 @@ export interface PapayaStorage extends BaseContract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
+    checkIfAddressIsInitialized(overrides?: CallOverrides): Promise<boolean>;
+
     getPublicKey(
       _address: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -116,6 +134,8 @@ export interface PapayaStorage extends BaseContract {
   filters: {};
 
   estimateGas: {
+    checkIfAddressIsInitialized(overrides?: CallOverrides): Promise<BigNumber>;
+
     getPublicKey(
       _address: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -128,6 +148,10 @@ export interface PapayaStorage extends BaseContract {
   };
 
   populateTransaction: {
+    checkIfAddressIsInitialized(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     getPublicKey(
       _address: PromiseOrValue<string>,
       overrides?: CallOverrides

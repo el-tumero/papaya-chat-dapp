@@ -1,114 +1,63 @@
-import forge from "node-forge"
 import { ethers, Signer } from "ethers"
-import papayaStorageData from "../abis/PapayaStorage.json"
-import { useEffect, useState } from "react"
-import Dexie, {Table} from "dexie"
-
+import { useState } from "react"
+import KeyPairDatabase from "../KeyPairDatabase"
 
 interface Props {
     signer: Signer | undefined
+    contract: ethers.Contract | undefined
 }
 
-interface KeyPairRecord {
-    id?:number
-    pair?:CryptoKeyPair 
-}
 
-class KeyPairsDatabase extends Dexie {
-    public keyPairs!: Table<KeyPairRecord, number>
+function KeyPair({signer, contract}:Props){
 
-    public constructor() {
-        super("KeyPairsDatabase")
-        this.version(1).stores({
-            keyPairs: "++id,pair"
-        })
-    }
-}
-
-function KeyPair({signer}:Props){
-
-    const [publicKey, setPublicKey] = useState<string>()
-    const [contract, setContract] = useState<ethers.Contract>()
-
-    useEffect(() => {
-        if(signer){
-            const {address, abi} = papayaStorageData
-            const papayaStorageContract = new ethers.Contract(address, abi, signer)
-            setContract(papayaStorageContract)
-            console.log("Contract initialized!")
-        }
-    }, [signer])
-
+    const [db] = useState<KeyPairDatabase>(new KeyPairDatabase())
 
     async function generateKeyPair(){
+        const keyPair = await window.crypto.subtle.generateKey(
+            {
+                name: "RSA-OAEP",
+                modulusLength: 1024,
+                publicExponent: new Uint8Array([1, 0, 1]),
+                hash: "SHA-256"
+            },
+            true,
+            ["encrypt", "decrypt"]
+        )
 
-        const db = new KeyPairsDatabase()
-
-        // const keyPair = await window.crypto.subtle.generateKey(
-        //     {
-        //         name: "RSA-OAEP",
-        //         modulusLength: 1024,
-        //         publicExponent: new Uint8Array([1, 0, 1]),
-        //         hash: "SHA-256"
-        //     },
-        //     true,
-        //     ["encrypt", "decrypt"]
-        // )
-
-        // let keypair:CryptoKeyPair
-
-        db.transaction('r', db.keyPairs, async () => {
-            const result = await db.keyPairs.where("id").equals(1).toArray()
-
-            const keypair = result[0].pair!
-
-            console.log(keypair)
-
-            const enc = new TextEncoder()
-            const dec = new TextDecoder("utf-8")
-            const encoded = enc.encode("Hello")
-
-
-            const encrypted = await window.crypto.subtle.encrypt(
-                {
-                    name: "RSA-OAEP"
-                },
-                keypair.publicKey,
-                encoded
-            )
-
-            console.log(encrypted)
-            const decrypted = await window.crypto.subtle.decrypt(
-                {
-                    name: "RSA-OAEP"
-                },
-                keypair.privateKey,
-                encrypted
-            )
-
-            console.log(dec.decode(decrypted))
-
-            
-
+        db.transaction("rw", db.keyPairs, async () => {
+            const result = await db.keyPairs.toArray()
+            if(result.length === 0) {
+                console.log("New keypair")
+                await db.keyPairs.add({pair: keyPair})
+            }
             // console.log(result)
         })
-
-        
-        // export
-
-            
-        // console.log(keyPair)
     }
-
     
+    async function exportPublicKey(){
+        db.transaction("r", db.keyPairs, async () => {
+            const [record] = await db.keyPairs.toArray()
+            
+            console.log(record)
+
+            const key = record.pair!.publicKey
 
 
+            const exported = await window.crypto.subtle.exportKey(
+                "spki",
+                key
+            )
 
-    async function sendTransaction(){
-        if(contract && signer && publicKey){
-            const res = await contract.setPublicKey(publicKey)
+
+            // const exportedAsString = enc.encode(exported)
+            const exportedAsString = String.fromCharCode.apply<null, any, string>(null, new Uint8Array(exported))
+            console.log(exportedAsString)
+
+            const res = await contract!.setPublicKey(exportedAsString)
             console.log(res)
-        }   
+
+
+        })
     }
 
     async function checkPublicKey(){
@@ -125,8 +74,8 @@ function KeyPair({signer}:Props){
             <div onClick={generateKeyPair}>
                 Generate key pair
             </div>
-            <div onClick={sendTransaction}>
-                Send transaction!
+            <div onClick={exportPublicKey}>
+                Show public key!
             </div>
             <div onClick={checkPublicKey}>
                 Show public key!

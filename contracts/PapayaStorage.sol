@@ -3,8 +3,11 @@ pragma solidity 0.8.17;
 contract PapayaStorage {
 
     mapping(address => string) private publicKeys;
+    mapping(string => bool) private isPublicKeyIsTaken;
 
     function setPublicKey(string calldata _publicKey) public returns(bool) {
+        require(!isPublicKeyIsTaken[_publicKey]);
+        isPublicKeyIsTaken[_publicKey] = true;
         publicKeys[msg.sender] = _publicKey;
         return true;
     }
