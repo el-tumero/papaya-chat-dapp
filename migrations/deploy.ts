@@ -9,13 +9,19 @@ async function main() {
     const PapayaStorage = await ethers.getContractFactory("PapayaStorage")
     const papayaStorage = await PapayaStorage.deploy()
 
+    const PapayaProfile = await ethers.getContractFactory("PapayaProfile")
+    const papayaProfile = await PapayaProfile.deploy()
+
     await papayaStorage.deployed()
+    await papayaProfile.deployed
 
-    const address = papayaStorage.address
 
-    const abi = getAbi("PapayaStorage")
 
-    createInterfaceForClient("PapayaStorage", abi, address)
+    const abiPapayaStorage = getAbi("PapayaStorage")
+    const abiPapayaProfile = getAbi("PapayaProfile")
+
+    createInterfaceForClient("PapayaStorage", abiPapayaStorage, papayaStorage.address)
+    createInterfaceForClient("PapayaProfile", abiPapayaProfile, papayaProfile.address)
 
     // deployer.sendTransaction({
     //     to: metamaskWalletAddress,

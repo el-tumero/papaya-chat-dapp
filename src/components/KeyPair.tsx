@@ -1,16 +1,46 @@
 import { ethers, Signer } from "ethers"
 import { useState } from "react"
 import KeyPairDatabase from "../KeyPairDatabase"
+import axios from "axios"
+import convertToBase64 from "../utils/convertToBase64"
 
 interface Props {
     signer: Signer | undefined
-    contract: ethers.Contract | undefined
+    storageContract: ethers.Contract | undefined
+    profileContract: ethers.Contract | undefined
 }
 
 
-function KeyPair({signer, contract}:Props){
+function KeyPair({signer, storageContract, profileContract}:Props){
 
     const [db] = useState<KeyPairDatabase>(new KeyPairDatabase())
+    const [selectedFile, setSelectedFile] = useState<File>()
+
+    const ipfsServiceUrl = "http://localhost:8000"
+    const ipfsGateway = "https://ipfs.io/ipfs/"
+
+    async function createProfile(){
+        if(selectedFile){
+            const imageAsBase64 = await convertToBase64(selectedFile)
+            const response = await axios.post(ipfsServiceUrl, {name: "John", bio: "Hello!", photo: imageAsBase64})
+            if(response.data.cid && profileContract){
+                const contractResponse = await profileContract.mint(response.data.cid)
+                console.log(contractResponse)
+            }
+        }
+        
+    }
+
+    async function showProfile(){
+        if(profileContract){
+            const ipfsCid = await profileContract.tokenURI(0) //!
+            const response = await axios.get(ipfsGateway + ipfsCid)
+            const data = response.data
+            console.log(data)
+        }
+        
+        // 
+    }
 
     async function generateKeyPair(){
         const keyPair = await window.crypto.subtle.generateKey(
@@ -53,7 +83,7 @@ function KeyPair({signer, contract}:Props){
             const exportedAsString = String.fromCharCode.apply<null, any, string>(null, new Uint8Array(exported))
             console.log(exportedAsString)
 
-            const res = await contract!.setPublicKey(exportedAsString)
+            const res = await storageContract!.setPublicKey(exportedAsString)
             console.log(res)
 
 
@@ -61,9 +91,9 @@ function KeyPair({signer, contract}:Props){
     }
 
     async function checkPublicKey(){
-        if(contract && signer){
+        if(storageContract && signer){
             const accountAddress = await signer.getAddress()
-            const res = await contract.getPublicKey(accountAddress) 
+            const res = await storageContract.getPublicKey(accountAddress) 
             console.log(res)
         }
     }
@@ -75,11 +105,20 @@ function KeyPair({signer, contract}:Props){
                 Generate key pair
             </div>
             <div onClick={exportPublicKey}>
-                Show public key!
+                Export public key!
             </div>
             <div onClick={checkPublicKey}>
                 Show public key!
             </div>
+            <br />
+            <input type="file" onChange={e => setSelectedFile(e.target.files![0])} />
+            <div onClick={createProfile}>
+                Create profile!
+            </div>
+            <div onClick={showProfile}>
+                Console profile
+            </div>
+
         </div>
         
     )
