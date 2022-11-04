@@ -8,6 +8,7 @@ import Cookies from 'universal-cookie'
 
 import './App.css';
 import { ethers, Signer } from 'ethers';
+import RelationList from './components/RelationList/RelationList';
 
 function App() {
 
@@ -60,19 +61,20 @@ function App() {
   return (
       <div className="App">
       <header className="App-header">
-        {/* {(isAccountInitialized && isLogged && !receiver) &&
-          <div>
-            <button onClick={() => setReceiver("0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199".toLowerCase())}>Chorome</button>
-            <button onClick={() => setReceiver("0xdD2FD4581271e230360230F9337D5c0430Bf44C0".toLowerCase())}>Brave</button>
-          </div>
-        } */}
+        {(isAccountInitialized && isLogged && !receiver) &&
+          <RelationList signer={signer} storageContract={storageContract} profileContract={profileContract} setReceiver={setReceiver} />
+          // <div>
+          //   <button onClick={() => setReceiver("0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199".toLowerCase())}>Chorome</button>
+          //   <button onClick={() => setReceiver("0xdD2FD4581271e230360230F9337D5c0430Bf44C0".toLowerCase())}>Brave</button>
+          // </div>
+        }
         {receiver &&
-          <MessageBox senderAddress={account} receiverAddress={receiver} contract={storageContract} />
+          <MessageBox senderAddress={account} receiverAddress={receiver} setReceiver={setReceiver} contract={storageContract} />
         }
         {!isLogged &&
           <ConnectWalletButton setAccount={setAccount} setSigner={setSigner}></ConnectWalletButton>
         }
-        {(isAccountInitialized && isLogged) &&
+        {(!isAccountInitialized && isLogged) &&
           <KeyPair signer={signer} storageContract={storageContract} profileContract={profileContract} />
         }
         

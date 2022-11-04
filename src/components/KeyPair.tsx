@@ -15,6 +15,7 @@ function KeyPair({signer, storageContract, profileContract}:Props){
 
     const [db] = useState<KeyPairDatabase>(new KeyPairDatabase())
     const [selectedFile, setSelectedFile] = useState<File>()
+    const [profileName, setProfileName] = useState<string>("")
 
     const ipfsServiceUrl = "http://localhost:8000"
     const ipfsGateway = "https://ipfs.io/ipfs/"
@@ -22,7 +23,7 @@ function KeyPair({signer, storageContract, profileContract}:Props){
     async function createProfile(){
         if(selectedFile){
             const imageAsBase64 = await convertToBase64(selectedFile)
-            const response = await axios.post(ipfsServiceUrl, {name: "John", bio: "Hello!", photo: imageAsBase64})
+            const response = await axios.post(ipfsServiceUrl, {name: profileName, bio: "Hello!", photo: imageAsBase64})
             if(response.data.cid && profileContract){
                 const contractResponse = await profileContract.mint(response.data.cid)
                 console.log(contractResponse)
@@ -32,11 +33,14 @@ function KeyPair({signer, storageContract, profileContract}:Props){
     }
 
     async function showProfile(){
-        if(profileContract){
-            const ipfsCid = await profileContract.tokenURI(0) //!
+        if(profileContract && signer){
+            const accountAddress = await signer.getAddress()
+            console.log(accountAddress)
+            const ipfsCid = await profileContract.activeProfile(accountAddress) //!
             const response = await axios.get(ipfsGateway + ipfsCid)
             const data = response.data
             console.log(data)
+
         }
         
         // 
@@ -111,6 +115,7 @@ function KeyPair({signer, storageContract, profileContract}:Props){
                 Show public key!
             </div>
             <br />
+            <input type="text" placeholder="name" onChange={e => setProfileName(e.target.value)} />
             <input type="file" onChange={e => setSelectedFile(e.target.files![0])} />
             <div onClick={createProfile}>
                 Create profile!

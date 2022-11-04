@@ -1,0 +1,11 @@
+.relation{
+    font-size: 10px;
+    margin-top: 20px;
+    background-color: black;
+}
+
+.relation .name {
+    font-size: 20px;
+    margin: 5px;
+    /* background-color: aqua; */
+}

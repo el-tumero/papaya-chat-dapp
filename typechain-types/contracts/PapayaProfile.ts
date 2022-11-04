@@ -29,6 +29,7 @@ import type {
 
 export interface PapayaProfileInterface extends utils.Interface {
   functions: {
+    "activeProfile(address)": FunctionFragment;
     "approve(address,uint256)": FunctionFragment;
     "balanceOf(address)": FunctionFragment;
     "getApproved(uint256)": FunctionFragment;
@@ -47,6 +48,7 @@ export interface PapayaProfileInterface extends utils.Interface {
 
   getFunction(
     nameOrSignatureOrTopic:
+      | "activeProfile"
       | "approve"
       | "balanceOf"
       | "getApproved"
@@ -63,6 +65,10 @@ export interface PapayaProfileInterface extends utils.Interface {
       | "transferFrom"
   ): FunctionFragment;
 
+  encodeFunctionData(
+    functionFragment: "activeProfile",
+    values: [PromiseOrValue<string>]
+  ): string;
   encodeFunctionData(
     functionFragment: "approve",
     values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
@@ -127,6 +133,10 @@ export interface PapayaProfileInterface extends utils.Interface {
     ]
   ): string;
 
+  decodeFunctionResult(
+    functionFragment: "activeProfile",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "approve", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
   decodeFunctionResult(
@@ -237,6 +247,11 @@ export interface PapayaProfile extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
+    activeProfile(
+      owner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
+
     approve(
       to: PromiseOrValue<string>,
       tokenId: PromiseOrValue<BigNumberish>,
@@ -311,6 +326,11 @@ export interface PapayaProfile extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
   };
+
+  activeProfile(
+    owner: PromiseOrValue<string>,
+    overrides?: CallOverrides
+  ): Promise<string>;
 
   approve(
     to: PromiseOrValue<string>,
@@ -387,6 +407,11 @@ export interface PapayaProfile extends BaseContract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
+    activeProfile(
+      owner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
     approve(
       to: PromiseOrValue<string>,
       tokenId: PromiseOrValue<BigNumberish>,
@@ -495,6 +520,11 @@ export interface PapayaProfile extends BaseContract {
   };
 
   estimateGas: {
+    activeProfile(
+      owner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     approve(
       to: PromiseOrValue<string>,
       tokenId: PromiseOrValue<BigNumberish>,
@@ -571,6 +601,11 @@ export interface PapayaProfile extends BaseContract {
   };
 
   populateTransaction: {
+    activeProfile(
+      owner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     approve(
       to: PromiseOrValue<string>,
       tokenId: PromiseOrValue<BigNumberish>,

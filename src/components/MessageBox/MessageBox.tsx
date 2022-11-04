@@ -10,9 +10,10 @@ interface Props{
     senderAddress: string | undefined,
     receiverAddress: string | undefined,
     contract: ethers.Contract | undefined
+    setReceiver: React.Dispatch<React.SetStateAction<string | undefined>>
 }
 
-function MessageBox({senderAddress, receiverAddress, contract}:Props){
+function MessageBox({senderAddress, receiverAddress, contract, setReceiver}:Props){
 
     const [messages, setMessages] = useState<string[]>([])
     const [typedMessage, setTypedMessage] = useState<string>("")
@@ -140,6 +141,7 @@ function MessageBox({senderAddress, receiverAddress, contract}:Props){
             </div>
             <input type="text" className="input" onChange={e => setTypedMessage(e.target.value)} />
             <button className="sendButton" onClick={() => { sendMessage() }}>Send</button>
+            <button onClick={() => setReceiver(undefined)}>Close conversation</button>
         </div>
     )
 }
