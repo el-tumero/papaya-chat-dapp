@@ -4,11 +4,16 @@ import KeyPair from './components/KeyPair';
 import papayaStorageData from "./abis/PapayaStorage.json"
 import papayaProfileData from "./abis/PapayaProfile.json"
 import MessageBox from './components/MessageBox/MessageBox';
-import Cookies from 'universal-cookie'
+
 
 import './App.css';
 import { ethers, Signer } from 'ethers';
 import RelationList from './components/RelationList/RelationList';
+import { Socket } from 'socket.io-client';
+import getKeyPairFromDatabase from './utils/getKeyPairFromDatabase';
+import IMessageData from './types/IMessageData';
+import IMessageDataDb from './types/IMessageDataDb';
+import decryptMessage from './utils/decryptMessage';
 
 function App() {
 
@@ -19,10 +24,43 @@ function App() {
   const [storageContract, setStorageContract] = useState<ethers.Contract>()
   const [profileContract, setProfileContract] = useState<ethers.Contract>()
   const [receiver, setReceiver] = useState<string>()
+  const [socket, setSocket] = useState<Socket>()
+  const [messageDb, setMessageDb] = useState<IMessageDataDb>({})
 
   // useEffect(() => {
   //   console.log(isAccountInitialized)
+  //   console.log(isLogged)
   // })
+
+  useEffect(() => {
+    if(socket && account && isAccountInitialized){
+      console.log(account)
+      socket.on(account, (data:IMessageData) => {
+        getKeyPairFromDatabase((pair) => {
+          decryptMessage(data.content, pair).then(decrypted => {
+
+            setMessageDb(prev => {
+            
+            if(prev[data.from]) return ({
+              ...prev,
+              [data.from]: [...prev[data.from], {timestamp: data.timestamp, content: decrypted}]
+            })  
+            return ({
+              ...prev,
+              [data.from]: [{timestamp: data.timestamp, content: decrypted}]
+            })
+
+          })  
+          })
+        })
+
+      })
+    }
+  }, [isAccountInitialized])
+
+  useEffect(() => {
+    console.log(messageDb)
+  },[messageDb])
 
   useEffect(() => {
     if(signer){
@@ -43,13 +81,6 @@ function App() {
           setIsLogged(true)
           setIsAccountInitialized(result)
         })
-
-        const cookies = new Cookies()
-        if(cookies.get("signature") === undefined){
-          signer.signMessage("thats me").then(result => {
-            cookies.set("signature", result)
-          })
-        }
         
         console.log("Contract initialized & logged in!")
     }
@@ -69,10 +100,10 @@ function App() {
           // </div>
         }
         {receiver &&
-          <MessageBox senderAddress={account} receiverAddress={receiver} setReceiver={setReceiver} contract={storageContract} />
+          <MessageBox senderAddress={account} receiverAddress={receiver} setReceiver={setReceiver} contract={storageContract} socket={socket} messageDb={messageDb} />
         }
         {!isLogged &&
-          <ConnectWalletButton setAccount={setAccount} setSigner={setSigner}></ConnectWalletButton>
+          <ConnectWalletButton setAccount={setAccount} setSigner={setSigner} setSocket={setSocket}></ConnectWalletButton>
         }
         {(!isAccountInitialized && isLogged) &&
           <KeyPair signer={signer} storageContract={storageContract} profileContract={profileContract} />

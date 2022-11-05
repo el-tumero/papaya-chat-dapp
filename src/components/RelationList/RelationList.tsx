@@ -38,7 +38,6 @@ function RelationList({storageContract, profileContract, signer, setReceiver}: P
                     profiles[relation] = JSON.parse(data)
                 }
                 
-                console.log(profiles)
             })
 
             return(
