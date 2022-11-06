@@ -3,15 +3,20 @@ import str2ab from "./str2ab"
 
 export default async function getPublicKeyFromBlockchain(contract:ethers.Contract, address:string){
     if(contract){
-        const publicKeyStr = await contract.getPublicKey(address) as string
-        const binPublicKey = str2ab(publicKeyStr)
+        const key = await contract.getPublicKey(address) as string
+        const jwk = JSON.parse(key)
+
         try {
-            const publicKey = await window.crypto.subtle.importKey("spki", binPublicKey, {
-                name: "RSA-OAEP",
-                hash: "SHA-256"
-            },
-            true,
-            ["encrypt"])
+            const publicKey = await window.crypto.subtle.importKey(
+                "jwk",
+                jwk,
+                {
+                    name: "ECDH",
+                    namedCurve: "P-384"
+                },
+                true,
+                []
+            )
 
             return publicKey
         } catch (error) {

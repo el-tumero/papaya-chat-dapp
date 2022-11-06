@@ -49,13 +49,11 @@ function KeyPair({signer, storageContract, profileContract}:Props){
     async function generateKeyPair(){
         const keyPair = await window.crypto.subtle.generateKey(
             {
-                name: "RSA-OAEP",
-                modulusLength: 1024,
-                publicExponent: new Uint8Array([1, 0, 1]),
-                hash: "SHA-256"
+                name: "ECDH",
+                namedCurve: "P-384"
             },
             true,
-            ["encrypt", "decrypt"]
+            ["deriveKey"]
         )
 
         db.transaction("rw", db.keyPairs, async () => {
@@ -78,16 +76,11 @@ function KeyPair({signer, storageContract, profileContract}:Props){
 
 
             const exported = await window.crypto.subtle.exportKey(
-                "spki",
+                "jwk",
                 key
             )
-
-
-            // const exportedAsString = enc.encode(exported)
-            const exportedAsString = String.fromCharCode.apply<null, any, string>(null, new Uint8Array(exported))
-            console.log(exportedAsString)
-
-            const res = await storageContract!.setPublicKey(exportedAsString)
+            const exportKeyOutput = JSON.stringify(exported, null, " ")
+            const res = await storageContract!.setPublicKey(exportKeyOutput)
             console.log(res)
 
 

@@ -17,6 +17,8 @@ interface Props {
   setSocket: React.Dispatch<SetStateAction<Socket | undefined>>
 }
 
+const serverUrl = process.env.REACT_APP_SERVER_URL
+
 function ConnectWalletButton({setAccount, setSigner, setSocket}:Props) {
 
   async function handleClick(){
@@ -34,7 +36,7 @@ function ConnectWalletButton({setAccount, setSigner, setSocket}:Props) {
           const signature = await signer.signMessage("thats me")
           cookies.set("signature", signature)
 
-          setSocket(io("ws://localhost:3344", {
+          setSocket(io(serverUrl, {
             auth: {
               signature,
               address: accounts[0]
@@ -50,7 +52,7 @@ function ConnectWalletButton({setAccount, setSigner, setSocket}:Props) {
       
         const signature = cookies.get("signature")
 
-        setSocket(io("ws://localhost:3344", {
+        setSocket(io(serverUrl, {
           auth: {
             signature,
             address: accounts[0]

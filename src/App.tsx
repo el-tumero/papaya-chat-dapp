@@ -15,6 +15,8 @@ import IMessageData from './types/IMessageData';
 import IMessageDataDb from './types/IMessageDataDb';
 import decryptMessage from './utils/decryptMessage';
 import axios from 'axios';
+import deriveSecretKey from './utils/deriveSecretKey';
+import jwkToCryptoKey from './utils/jwkToCryptoKey';
 
 interface IMessageDataContentAsObject extends Omit<IMessageData, "content">{
   content: {type: string, data:number[]}
@@ -32,25 +34,68 @@ function App() {
   const [socket, setSocket] = useState<Socket>()
   const [messageDb, setMessageDb] = useState<IMessageDataDb>({})
 
+  const [lastMessageAddress, setLastMessageAddress] = useState<string[]>([])
 
-  // useEffect(() => {
-  //   console.log(isAccountInitialized)
-  //   console.log(isLogged)
-  // })
+  const serverUrl = process.env.REACT_APP_SERVER_URL
 
-  
+  useEffect(() => {
+    if( (document.hidden || receiver !== lastMessageAddress[0]) && lastMessageAddress[0] ){
+      new Notification("New message", {body: lastMessageAddress[0] + " send you a message!"})
+      setLastMessageAddress([])
+    }
+
+    // if(receiver !== lastMessageAddress[0] && lastMessageAddress[0]){
+    //   new Notification("New message", {body: lastMessageAddress[0] + " send you a message!"})
+    //   setLastMessageAddress([])
+    //   return
+    // }
+  }, [lastMessageAddress, receiver])
+
+
+
+  useEffect(() => {
+    Notification.requestPermission().then(permision => {
+      if(permision == "granted"){
+        console.log("Notification access granted!")
+      }
+    })
+  }, [])
 
   useEffect(() => {
     if(socket && account && isAccountInitialized){
 
-      axios.get("http://localhost:3344/messages", {params: {address: account}}).then(response => {
+      axios.get(serverUrl+"/messages", {params: {address: account}}).then(async response => {
         const data = response.data as IMessageDataContentAsObject[]
         if(data.length > 0){
-          getKeyPairFromDatabase((pair) => {
-            const decryptedMessages = data.map(msg => decryptMessage(Uint8Array.from(msg.content.data).buffer, pair) )
-            
-            Promise.all(decryptedMessages).then(values => {
+            const pair = await getKeyPairFromDatabase()
+            const secrets:{[key:string]: CryptoKey} = {}
 
+            const messagesFromKnown = []
+            let messagesFromUnknown:{[key:string]: number} = {}
+
+            for(let i=0; i<data.length; i++){
+              const rawJwk = localStorage.getItem("p"+data[i].from)
+
+              if(rawJwk) messagesFromKnown.push(data[i])
+
+              if(!rawJwk) messagesFromUnknown[data[i].from] = messagesFromUnknown[data[i].from] + 1 || 1
+
+              if(!secrets[data[i].from] && rawJwk) {
+                const jwk = JSON.parse(rawJwk)
+                const publicKey = await jwkToCryptoKey(jwk)
+                const secret = await deriveSecretKey(pair.privateKey, publicKey)
+                secrets[data[i].from] = secret
+              }
+              
+            }
+            
+            Object.keys(messagesFromUnknown).forEach(address => {
+              console.log(messagesFromUnknown[address], "new messages from", address)
+            });
+
+            const decryptedMessages = messagesFromKnown.map(msg => decryptMessage(Uint8Array.from(msg.content.data).buffer, secrets[msg.from]))
+              
+            Promise.all(decryptedMessages).then(values => {
               const temp:IMessageDataDb = {}
               data.forEach((element, i) => {
                 
@@ -63,48 +108,45 @@ function App() {
 
               setMessageDb(temp)
             })
-          })
+
         }
       })
 
 
-      console.log(account)
-      socket.on(account, (data:IMessageData) => {
-        getKeyPairFromDatabase((pair) => {
-          decryptMessage(data.content, pair).then(decrypted => {
-            console.log(data.content)
+      // console.log(account)
+      socket.on(account, async(data:IMessageData) => {
+        const pair = await getKeyPairFromDatabase()
 
-            const rawInfo = localStorage.getItem(data.from)
-            console.log(data.from)
-            if(rawInfo) {
-              const info = JSON.parse(rawInfo)
-              console.log("New message from:",info.name, decrypted)
-            } else {
-              console.log("New message from:",data.from, decrypted)
-            }
+        const rawJwk = localStorage.getItem("p" + data.from)
+        if(rawJwk){
+          const jwk = JSON.parse(rawJwk)
+          const publicKey = await jwkToCryptoKey(jwk)
+          const secret = await deriveSecretKey(pair.privateKey, publicKey)
+          const decrypted = await decryptMessage(data.content, secret)
 
-            setMessageDb(prev => {
-            
+          setLastMessageAddress([data.from])
+
+          setMessageDb(prev => {
             if(prev[data.from]) return ({
               ...prev,
               [data.from]: [...prev[data.from], {timestamp: data.timestamp, content: decrypted}]
             })  
             return ({
-              ...prev,
-              [data.from]: [{timestamp: data.timestamp, content: decrypted}]
+            ...prev,
+            [data.from]: [{timestamp: data.timestamp, content: decrypted}]
             })
-
           })  
-          })
-        })
+
+
+        }
 
       })
     }
   }, [isAccountInitialized])
 
-  useEffect(() => {
-    console.log(messageDb)
-  },[messageDb])
+  // useEffect(() => {
+  //   console.log(messageDb)
+  // },[messageDb])
 
   useEffect(() => {
     if(signer){
@@ -131,17 +173,11 @@ function App() {
   }, [signer])
 
   
-
-
   return (
       <div className="App">
       <header className="App-header">
         {(isAccountInitialized && isLogged && !receiver) &&
           <RelationList signer={signer} storageContract={storageContract} profileContract={profileContract} setReceiver={setReceiver} />
-          // <div>
-          //   <button onClick={() => setReceiver("0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199".toLowerCase())}>Chorome</button>
-          //   <button onClick={() => setReceiver("0xdD2FD4581271e230360230F9337D5c0430Bf44C0".toLowerCase())}>Brave</button>
-          // </div>
         }
         {receiver &&
           <MessageBox senderAddress={account} receiverAddress={receiver} setReceiver={setReceiver} contract={storageContract} socket={socket} messageDb={messageDb} />
