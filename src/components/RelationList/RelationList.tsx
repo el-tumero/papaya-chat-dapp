@@ -67,30 +67,32 @@ function RelationList({storageContract, profileContract, signer, setReceiver}: P
                 if(result.length === 0) {
                     throw Error("Current address has not created an account on this service :(")
                 }
+                localStorage.setItem("p"+newRelationAddress.toLowerCase(), result)
+
                 const profileCid = await profileContract.activeProfile(newRelationAddress)
 
                 const response = await axios.get(ipfsGateway + profileCid)
                 const profile = response.data
 
-                localStorage.setItem(newRelationAddress, JSON.stringify(profile))
+                localStorage.setItem(newRelationAddress.toLowerCase(), JSON.stringify(profile))
                 const cookies = cookiesClient
 
                 const relations = cookies.get("relations") as string[]
                 if(!relations){
-                    cookies.set("relations", [newRelationAddress])
+                    cookies.set("relations", [newRelationAddress.toLowerCase()])
                     console.log("New relation added!")
-                    setRelations([newRelationAddress])
+                    setRelations([newRelationAddress.toLowerCase()])
                     return
                 }
 
-                const found = relations.find(element => element === newRelationAddress)
+                const found = relations.find(element => element === newRelationAddress.toLowerCase())
 
                 if(found){
                     throw Error("Relation is already created!")
                 }
 
-                cookies.set("relations", [...relations, newRelationAddress])
-                setRelations(current => [...current!, newRelationAddress])
+                cookies.set("relations", [...relations, newRelationAddress.toLowerCase()])
+                setRelations(current => [...current!, newRelationAddress.toLowerCase()])
 
             } catch (error) {
                 console.error(error)

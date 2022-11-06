@@ -25,8 +25,10 @@ function MessageBox({senderAddress, receiverAddress, contract, setReceiver, sock
     const [messages, setMessages] = useState<string[]>([])
     const [typedMessage, setTypedMessage] = useState<string>("")
     const [receiverPublicKey, setReceiverPublicKey] = useState<CryptoKey>()
+    const [senderMessages, setSenderMessages] = useState<{content:string | undefined, timestamp:number}[]>([]) 
     
-    const ref = useRef<HTMLInputElement>(null)
+    const inputRef = useRef<HTMLInputElement>(null)
+    const bottomRef = useRef<HTMLDivElement>(null)
 
 
     useEffect(() => {
@@ -40,25 +42,40 @@ function MessageBox({senderAddress, receiverAddress, contract, setReceiver, sock
     }, [receiverPublicKey])
 
     useEffect(() => {
-        if(receiverAddress && messageDb[receiverAddress]){
-            
-            // console.log(messageDb)
-            setMessages(prev => { return messageDb[receiverAddress].map(element => element.content!) })
+
+        if(receiverAddress && !messageDb[receiverAddress]){
+            setMessages(senderMessages.map(element => element.content!))
         }
-        
-    }, [messageDb])
+
+        if(receiverAddress && messageDb[receiverAddress]){
+
+            const receiverMessages = messageDb[receiverAddress]
+
+            const convMessages = senderMessages.concat(receiverMessages)
+
+
+            convMessages.sort((a, b) => a.timestamp - b.timestamp)
+            setMessages(convMessages.map(element => element.content!))
+
+            
+
+            // console.log(messageDb)
+            // setMessages(prev => { return messageDb[receiverAddress].map(element => element.content!) })
+        }
+
+            
+    }, [messageDb, senderMessages])
+
+    useEffect(() => {
+        bottomRef.current?.scrollIntoView({behavior: 'smooth'});
+    }, [messages])
 
     
-    // useEffect(() => {
-    //     if(senderKeyPair && receiverPublicKey){
-    //         console.log("Trying to connect!")
-    //     }
-    // }, [senderKeyPair, receiverPublicKey])
-
-
     async function sendMessage(){
         if(!socket || !receiverPublicKey) return
-        setMessages(current => [...current, typedMessage])
+
+        setSenderMessages(current => [...current, {content: typedMessage, timestamp: Date.now()}])
+        // setMessages(current => [...current, typedMessage])
 
         const enc = new TextEncoder()
         const encodedMessage = enc.encode(typedMessage)
@@ -79,7 +96,8 @@ function MessageBox({senderAddress, receiverAddress, contract, setReceiver, sock
         
         socket.send(message)
 
-        ref.current!.value = ""
+        inputRef.current!.value = ""
+        setTypedMessage("")
     }
 
 
@@ -92,9 +110,11 @@ function MessageBox({senderAddress, receiverAddress, contract, setReceiver, sock
             <p className="text">To: {receiverAddress}</p>
             <div className="messages">
                 {messages.map((message, index) => (<p className="message" key={index}>{message}</p>))}
+                <div ref={bottomRef}></div>
             </div>
-            <input type="text" className="input" ref={ref} onChange={e => setTypedMessage(e.target.value)} />
+            <input type="text" className="input" ref={inputRef} onChange={e => setTypedMessage(e.target.value)} onKeyDown={e => { if(e.key === "Enter") sendMessage() }} />
             <button className="sendButton" onClick={() => { sendMessage() }}>Send</button>
+
         </div>
     )
 }

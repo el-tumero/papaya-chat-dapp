@@ -14,6 +14,11 @@ import getKeyPairFromDatabase from './utils/getKeyPairFromDatabase';
 import IMessageData from './types/IMessageData';
 import IMessageDataDb from './types/IMessageDataDb';
 import decryptMessage from './utils/decryptMessage';
+import axios from 'axios';
+
+interface IMessageDataContentAsObject extends Omit<IMessageData, "content">{
+  content: {type: string, data:number[]}
+}
 
 function App() {
 
@@ -27,17 +32,56 @@ function App() {
   const [socket, setSocket] = useState<Socket>()
   const [messageDb, setMessageDb] = useState<IMessageDataDb>({})
 
+
   // useEffect(() => {
   //   console.log(isAccountInitialized)
   //   console.log(isLogged)
   // })
 
+  
+
   useEffect(() => {
     if(socket && account && isAccountInitialized){
+
+      axios.get("http://localhost:3344/messages", {params: {address: account}}).then(response => {
+        const data = response.data as IMessageDataContentAsObject[]
+        if(data.length > 0){
+          getKeyPairFromDatabase((pair) => {
+            const decryptedMessages = data.map(msg => decryptMessage(Uint8Array.from(msg.content.data).buffer, pair) )
+            
+            Promise.all(decryptedMessages).then(values => {
+
+              const temp:IMessageDataDb = {}
+              data.forEach((element, i) => {
+                
+                if(temp[element.from]){
+                  temp[element.from].push({timestamp: element.timestamp, content: values[i]})
+                } else {
+                  temp[element.from] = [{timestamp: element.timestamp, content: values[i]}]
+                }
+              })
+
+              setMessageDb(temp)
+            })
+          })
+        }
+      })
+
+
       console.log(account)
       socket.on(account, (data:IMessageData) => {
         getKeyPairFromDatabase((pair) => {
           decryptMessage(data.content, pair).then(decrypted => {
+            console.log(data.content)
+
+            const rawInfo = localStorage.getItem(data.from)
+            console.log(data.from)
+            if(rawInfo) {
+              const info = JSON.parse(rawInfo)
+              console.log("New message from:",info.name, decrypted)
+            } else {
+              console.log("New message from:",data.from, decrypted)
+            }
 
             setMessageDb(prev => {
             
