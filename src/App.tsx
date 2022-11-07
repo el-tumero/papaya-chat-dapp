@@ -33,6 +33,7 @@ function App() {
   const [receiver, setReceiver] = useState<string>()
   const [socket, setSocket] = useState<Socket>()
   const [messageDb, setMessageDb] = useState<IMessageDataDb>({})
+  const [openKeyPairScreen, setOpenKeyPairScreen] = useState<boolean>(false)
 
   const [lastMessageAddress, setLastMessageAddress] = useState<string[]>([])
 
@@ -43,12 +44,6 @@ function App() {
       new Notification("New message", {body: lastMessageAddress[0] + " send you a message!"})
       setLastMessageAddress([])
     }
-
-    // if(receiver !== lastMessageAddress[0] && lastMessageAddress[0]){
-    //   new Notification("New message", {body: lastMessageAddress[0] + " send you a message!"})
-    //   setLastMessageAddress([])
-    //   return
-    // }
   }, [lastMessageAddress, receiver])
 
 
@@ -144,10 +139,6 @@ function App() {
     }
   }, [isAccountInitialized])
 
-  // useEffect(() => {
-  //   console.log(messageDb)
-  // },[messageDb])
-
   useEffect(() => {
     if(signer){
         const {address: storageAddress, abi: storageAbi} = papayaStorageData
@@ -161,11 +152,12 @@ function App() {
 
 
         papayaStorageContract.checkIfAddressIsInitialized()
-        .then((result:any) => {
+        .then((result:boolean) => {
 
-          console.log(result)
+          // console.log(result)
           setIsLogged(true)
           setIsAccountInitialized(result)
+          setOpenKeyPairScreen(!result)
         })
         
         console.log("Contract initialized & logged in!")
@@ -176,8 +168,8 @@ function App() {
   return (
       <div className="App">
       <header className="App-header">
-        {(isAccountInitialized && isLogged && !receiver) &&
-          <RelationList signer={signer} storageContract={storageContract} profileContract={profileContract} setReceiver={setReceiver} />
+        {(!openKeyPairScreen && isLogged && !receiver) &&
+          <RelationList signer={signer} storageContract={storageContract} profileContract={profileContract} setReceiver={setReceiver} setOpenKeyPairScreen={setOpenKeyPairScreen} />
         }
         {receiver &&
           <MessageBox senderAddress={account} receiverAddress={receiver} setReceiver={setReceiver} contract={storageContract} socket={socket} messageDb={messageDb} />
@@ -185,8 +177,8 @@ function App() {
         {!isLogged &&
           <ConnectWalletButton setAccount={setAccount} setSigner={setSigner} setSocket={setSocket}></ConnectWalletButton>
         }
-        {(!isAccountInitialized && isLogged) &&
-          <KeyPair signer={signer} storageContract={storageContract} profileContract={profileContract} />
+        {(isLogged && openKeyPairScreen) &&
+          <KeyPair signer={signer} storageContract={storageContract} profileContract={profileContract} setOpenKeyPairScreen={setOpenKeyPairScreen} />
         }
         
       </header>

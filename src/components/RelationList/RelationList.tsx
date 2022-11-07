@@ -9,9 +9,10 @@ interface Props{
     profileContract: ethers.Contract | undefined
     signer: ethers.Signer | undefined
     setReceiver: React.Dispatch<SetStateAction<string | undefined>>
+    setOpenKeyPairScreen: React.Dispatch<SetStateAction<boolean>>
 }
 
-function RelationList({storageContract, profileContract, signer, setReceiver}: Props){
+function RelationList({storageContract, profileContract, signer, setReceiver, setOpenKeyPairScreen}: Props){
 
     const [newRelationAddress, setNewRelationAddress] = useState<string>()
     const [cookiesClient] = useState<Cookies>(new Cookies())
@@ -103,6 +104,7 @@ function RelationList({storageContract, profileContract, signer, setReceiver}: P
 
     return(
         <div>
+            <button onClick={() => setOpenKeyPairScreen(true)}>Options</button>
             <p>Add relation:</p>
             <input placeholder="address" onChange={e => setNewRelationAddress(e.target.value)}/>
             <button onClick={addNewRelation}>Add</button>

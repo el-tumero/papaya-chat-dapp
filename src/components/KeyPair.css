@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik&display=swap');
+
+
+.container{
+    background-color: gray;
+    border-radius: 10px;
+    padding-inline: 14px;
+}
+
+.keysTitle{
+    /* background-color: aliceblue; */
+    margin-bottom: 20px;
+}
+
+.profileTitle{
+    margin:0;
+    margin-top: 15px;
+    /* margin-top: 20px; */
+}
+
+.goBackButton{
+    text-align: left;
+    font-size: 20px;
+    /* background-color: red; */
+    padding: 0;
+    margin-top: 5px;
+}
+
+.goBackButton .goBackText{
+    user-select: none;
+    cursor: pointer;
+    background-color: dimgray;
+    border-radius: 5px;
+    /* padding: 3px; */
+    padding-block: 3px;
+    padding-inline: 5px;
+}
+
+.goBackButton .goBackText:hover{
+    background-color: rgb(50, 50, 50);
+}
+
+.keyPairButton{
+
+    user-select: none;
+    cursor: pointer;
+
+    font-family: 'Rubik', sans-serif;
+
+
+    background-color: rgb(250, 180, 49);
+    margin-top: 10px;
+    font-size: 24px;
+    border-radius: 10px;
+    padding-block: 10px;
+    /* padding-left: 10px;
+    padding-right: 10px; */
+    padding-inline: 7px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* row-gap: 10px; */
+    column-gap: 14px;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+
+    /* box-shadow: 0 0 0 2px rgb(255, 177, 9); */
+}
+
+.keyPairButton:hover{
+    background-color: rgb(200, 130, 0); 
+}
