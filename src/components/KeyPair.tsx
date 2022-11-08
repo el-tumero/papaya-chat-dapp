@@ -7,26 +7,36 @@ import doneIcon from "../icons/doneicon.png"
 import notDoneIcon from "../icons/notdoneicon.png"
 import loadingIcon from "../icons/loadingicon.gif"
 import "./KeyPair.css"
+import { Blob, NFTStorage } from "nft.storage"
 
 
 interface Props {
     signer: Signer | undefined
     storageContract: ethers.Contract | undefined
     profileContract: ethers.Contract | undefined
+    isAccountInitialized: boolean
     setOpenKeyPairScreen: React.Dispatch<SetStateAction<boolean>>
 }
 
+interface Profile{
+    name: string
+    bio: string
+    photo: string
+}
 
-function KeyPair({signer, storageContract, profileContract, setOpenKeyPairScreen}:Props){
+function KeyPair({signer, storageContract, profileContract, setOpenKeyPairScreen, isAccountInitialized}:Props){
 
     const [db] = useState<KeyPairDatabase>(new KeyPairDatabase())
     const [selectedFile, setSelectedFile] = useState<File>()
     const [profileName, setProfileName] = useState<string>("")
+    const [profileBio, setProfileBio] = useState<string>("")
     const [isKeyPairInDb, setIsKeyPairInDb] = useState<boolean>()
     // const [isPublicKeyOnBlockchain, setIsPublicKeyOnBlockchain] = useState<boolean>()
-    const [steps, setSteps] = useState<("done" | "notdone" | "loading")[]>(["notdone", "notdone", "notdone"])
+    const [steps, setSteps] = useState<("done" | "notdone" | "loading")[]>(["notdone", "notdone", "notdone", "notdone"])
+    const [currentProfile, setCurrentProfile] = useState<Profile>()
 
-    const ipfsServiceUrl = "http://localhost:8000"
+
+    // const ipfsServiceUrl = "http://localhost:8000"
     const ipfsGateway = "https://ipfs.io/ipfs/"
 
     useEffect(() => {
@@ -47,6 +57,7 @@ function KeyPair({signer, storageContract, profileContract, setOpenKeyPairScreen
         }
     }, [isKeyPairInDb])
 
+
     useEffect(() => {
         if(storageContract && signer){
             setSteps(prev => {
@@ -58,37 +69,90 @@ function KeyPair({signer, storageContract, profileContract, setOpenKeyPairScreen
             storageContract.checkIfAddressIsInitialized().then((state:boolean) => {
                 setSteps(prev => {
                     const copy = [...prev]
-                    copy[1] = "done"
+                    copy[1] = state ? "done" : "notdone"
                     return copy
                 })
             })
+
+            checkProfile()
+            
+            
         }
     }, [])
 
-    async function createProfile(){
-        if(selectedFile){
-            const imageAsBase64 = await convertToBase64(selectedFile)
-            const response = await axios.post(ipfsServiceUrl, {name: profileName, bio: "Hello!", photo: imageAsBase64})
-            if(response.data.cid && profileContract){
-                const contractResponse = await profileContract.mint(response.data.cid)
-                console.log(contractResponse)
+    async function checkProfile(){
+        if(signer && profileContract){
+            try {
+                const address = await signer.getAddress()
+                const cid = await profileContract.activeProfile(address)
+                if(cid){
+                    
+                    setSteps(prev => {
+                        const copy = [...prev]
+                        copy[3] = "loading"
+                        return copy
+                    })
+                    
+                    const response = await axios.get(ipfsGateway + cid)
+                    
+                    setSteps(prev => {
+                        const copy = [...prev]
+                        copy[3] = "done"
+                        return copy
+                    })
+
+                    setCurrentProfile(response.data)
+
+                    // console.log(response.data)
+                }
+                
+            } catch (error) {
+                console.log("Profile not created or is currently in state of creation :0")
             }
+
         }
         
     }
 
-    async function showProfile(){
-        if(profileContract && signer){
-            const accountAddress = await signer.getAddress()
-            console.log(accountAddress)
-            const ipfsCid = await profileContract.activeProfile(accountAddress) //!
-            const response = await axios.get(ipfsGateway + ipfsCid)
-            const data = response.data
-            console.log(data)
+    async function createProfile(){
+        if(selectedFile && profileContract){
 
+            setSteps(prev => {
+                const copy = [...prev]
+                copy[3] = "loading"
+                return copy
+            })
+
+            const imageAsBase64 = await convertToBase64(selectedFile)
+            const profileObj = {name: profileName, bio: profileBio, photo: imageAsBase64}
+            const content = new Blob([JSON.stringify(profileObj)])
+            const ipfsClient = new NFTStorage({token: process.env.REACT_APP_NFTSTORAGE_API_KEY})
+
+            try {
+                const cid = await ipfsClient.storeBlob(content)
+
+                const tx = await profileContract.mint(cid)
+                const receipt = await tx.wait()
+
+                setSteps(prev => {
+                    const copy = [...prev]
+                    copy[3] = "done"
+                    return copy
+                })
+
+                alert("Profile created! cid: " + cid)
+                document.location.reload()
+                // console.log(receipt) 
+            } catch (error) {
+                alert(error)
+                setSteps(prev => {
+                    const copy = [...prev]
+                    copy[3] = "notdone"
+                    return copy
+                })
+            }
         }
         
-        // 
     }
 
     async function generateKeyPair(){
@@ -110,6 +174,11 @@ function KeyPair({signer, storageContract, profileContract, setOpenKeyPairScreen
             await db.keyPairs.add({pair: keyPair})
             console.log("New key pair!")
         })
+        setSteps(prev => {
+            const copy = [...prev]
+            copy[0] = "done"
+            return copy
+        })
     }
     
     async function exportPublicKey(){
@@ -122,8 +191,10 @@ function KeyPair({signer, storageContract, profileContract, setOpenKeyPairScreen
         const key = await db.transaction("r", db.keyPairs, async () => {
             const [record] = await db.keyPairs.toArray()
             
-            console.log(record)
-
+            if(!record){
+                return false
+            }
+            
             const key = record.pair!.publicKey
 
             const exported = await window.crypto.subtle.exportKey(
@@ -134,6 +205,17 @@ function KeyPair({signer, storageContract, profileContract, setOpenKeyPairScreen
             
             return exportKeyOutput
         })
+
+        if(key === false){
+            setSteps(prev => {
+                const copy = [...prev]
+                copy[1] = "notdone"
+                return copy
+            })
+            alert("Key pair is not initialized!")
+            throw Error("Key pair is not initialized!")
+        }
+
 
         const tx = await storageContract!.setPublicKey(key)
         const receipt = await tx.wait()
@@ -178,6 +260,18 @@ function KeyPair({signer, storageContract, profileContract, setOpenKeyPairScreen
         }
     }
 
+    function ShowProfile(){
+        if(currentProfile){
+            return <div className="profileBox">
+                <img src={currentProfile.photo} width={64} alt="profile photo" />
+                <big className="name">{currentProfile.name}</big>
+                <small className="bio">"{currentProfile.bio}"</small>
+            </div>
+        }
+        return <></>
+    }
+
+
     function ShowIcon({stepId}:{stepId:number}){
         switch (steps[stepId]) {
             case "done":
@@ -196,7 +290,9 @@ function KeyPair({signer, storageContract, profileContract, setOpenKeyPairScreen
 
     return(
         <div className="container">
+            {isAccountInitialized &&
             <div className="goBackButton"><small className="goBackText" onClick={() => setOpenKeyPairScreen(false)}>← go back</small></div>
+            }
             <h1>Options</h1>
             <h3 className="keysTitle">Keys</h3>
             <div className="keyPairButton" onClick={generateKeyPair}>
@@ -209,16 +305,16 @@ function KeyPair({signer, storageContract, profileContract, setOpenKeyPairScreen
                 Check public key! <ShowIcon stepId={2} />
             </div>
             <h3 className="profileTitle">Profile</h3>
+            <ShowProfile />
+            <h5 className="newProfileTitle">New profile</h5>
             <input type="text" placeholder="name" onChange={e => setProfileName(e.target.value)} />
-            <input type="text" placeholder="bio" />
+            <input type="text" placeholder="bio" onChange={e => setProfileBio(e.target.value)}/>
             <input type="file" onChange={e => setSelectedFile(e.target.files![0])} />
-            <div onClick={createProfile}>
-                Create profile!
-            </div>
-            <div onClick={showProfile}>
-                Console profile
+            <div className="keyPairButton" onClick={createProfile}>
+                Create profile! <ShowIcon stepId={3} />
             </div>
 
+            
         </div>
         
     )

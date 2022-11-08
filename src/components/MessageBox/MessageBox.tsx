@@ -135,16 +135,19 @@ function MessageBox({senderAddress, receiverAddress, contract, setReceiver, sock
     }
 
     return(
-        <div>
+        <div className="messageBoxContainer">
             <p className="text">Sending messages as {senderAddress}</p>
             <p className="text">To: {receiverAddress}</p>
             <div className="messages">
                 {messages.map((message, index) => (<p className="message" key={index}>{message.me ? <b style={{color: "green"}} >me: </b> : "mate: " }{message.content}</p>))}
                 <div ref={bottomRef}></div>
             </div>
-            <input type="text" className="input" ref={inputRef} onChange={e => setTypedMessage(e.target.value)} onKeyDown={e => { if(e.key === "Enter") sendMessage() }} />
-            <button className="sendButton" onClick={() => { sendMessage() }}>Send</button>
-            <button onClick={() => setReceiver(undefined)}>Close</button>
+            <div>
+                <input type="text" className="input" ref={inputRef} onChange={e => setTypedMessage(e.target.value)} onKeyDown={e => { if(e.key === "Enter") sendMessage() }} />
+                <button className="sendButton" onClick={() => { sendMessage() }}>Send</button>
+                <button onClick={() => setReceiver(undefined)}>Close</button>
+            </div>
+            
 
         </div>
     )

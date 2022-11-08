@@ -2,9 +2,10 @@
 
 
 .container{
-    background-color: gray;
+    background-color: rgb(112, 112, 112);
     border-radius: 10px;
     padding-inline: 14px;
+    padding-bottom: 30px;
 }
 
 .keysTitle{
@@ -18,6 +19,35 @@
     /* margin-top: 20px; */
 }
 
+.newProfileTitle{
+    margin:0;
+    margin-top: 15px;
+}
+
+.profileBox {
+    margin-top: 10px;
+    background-color: rgb(85, 85, 85);
+    display: flex;
+    align-items: center;
+    flex-wrap:wrap;
+    /* text-align: center; */
+    padding: 15px;
+    border-radius: 10px;
+    padding-inline: 10%;
+}
+
+.profileBox .name {
+    /* background-color: aquamarine; */
+    padding-left: 10%;
+    font-size: 30px;
+}
+
+.profileBox .bio {
+    /* background-color: aquamarine; */
+    padding-left: 8%;
+    font-size: 20px;
+}
+
 .goBackButton{
     text-align: left;
     font-size: 20px;
@@ -29,7 +59,7 @@
 .goBackButton .goBackText{
     user-select: none;
     cursor: pointer;
-    background-color: dimgray;
+    background-color: rgb(86, 86, 86);
     border-radius: 5px;
     /* padding: 3px; */
     padding-block: 3px;
@@ -48,7 +78,7 @@
     font-family: 'Rubik', sans-serif;
 
 
-    background-color: rgb(250, 180, 49);
+    background-color: rgb(233, 158, 19);
     margin-top: 10px;
     font-size: 24px;
     border-radius: 10px;
@@ -61,11 +91,41 @@
     align-items: center;
     /* row-gap: 10px; */
     column-gap: 14px;
-    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    /* box-shadow: 0 0 1px 2px black ; */
+    box-shadow: 0px 2px 1px 0px #000,
+            2px 0px 0px 0px #000,
+            0px -1px 0px 0px rgb(62, 62, 62),
+            -1px 0px 0px 0px rgb(62, 62, 62);
 
     /* box-shadow: 0 0 0 2px rgb(255, 177, 9); */
 }
 
 .keyPairButton:hover{
     background-color: rgb(200, 130, 0); 
+}
+
+input[type=text]{
+    border-radius: 8px;
+    height: 30px;
+    /* margin-left: 5px; */
+    /* background-color: aqua; */
+    font-family: 'Rubik', sans-serif;
+    /* padding: 12px 20px; */
+    margin: 8px 0;
+    box-sizing: border-box;
+    /* border: solid orange 2px; */
+    margin-right: 5px;
+}
+
+input[type=file]::file-selector-button{
+    cursor: pointer;
+    background-color: rgb(233, 158, 19);
+    font-family: 'Rubik', sans-serif;
+    color: white;
+    padding: 5px;
+    padding-inline: 7px;
+    border-radius: 5px;
+    font-size: 14px;
+    /* border: solid orange 2px; */
+    margin-left: 8px;
 }

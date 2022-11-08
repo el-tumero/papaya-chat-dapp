@@ -2,6 +2,12 @@
     font-size: 15px;
 }
 
+.messageBoxContainer{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 .messages{
     height: 30vh;
     text-align: left;
@@ -9,6 +15,10 @@
     /* width: ; */
     background-color: aliceblue;
     overflow-y: auto;
+    border-radius: 10px;
+    word-break: break-all;
+    width: 50%;
+    /* inline-size: 30%; */
 }
 
 .message{

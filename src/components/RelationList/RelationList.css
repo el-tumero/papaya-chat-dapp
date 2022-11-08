@@ -1,11 +1,102 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik&display=swap');
+
+.container{
+    background-color: rgb(112, 112, 112);
+    border-radius: 10px;
+    padding-inline: 14px;
+    padding-bottom: 30px;
+    /* width: 18%; */
+}
+
+.optionsButton{
+    text-align: left;
+    font-size: 20px;
+    /* background-color: red; */
+    padding: 0;
+    margin-top: 5px;
+}
+
+.optionsButton .optionsText{
+    user-select: none;
+    cursor: pointer;
+    background-color: rgb(86, 86, 86);
+    border-radius: 5px;
+    /* padding: 3px; */
+    padding-block: 3px;
+    padding-inline: 5px;
+}
+
+.optionsButton .optionsText:hover{
+    background-color: rgb(50, 50, 50);
+}
+
+.relationsTitle{
+    margin:0;
+    margin-top: 15px;
+}
+
 .relation{
     font-size: 10px;
     margin-top: 20px;
-    background-color: black;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: rgb(60, 60, 60);
+    padding: 10px;
+    border-radius: 5px;
 }
 
 .relation .name {
     font-size: 20px;
     margin: 5px;
     /* background-color: aqua; */
+}
+
+input[type=text]{
+    border-radius: 8px;
+    height: 30px;
+    /* margin-left: 5px; */
+    /* background-color: aqua; */
+    font-family: 'Rubik', sans-serif;
+    /* padding: 12px 20px; */
+    margin: 8px 0;
+    box-sizing: border-box;
+    /* border: solid orange 2px; */
+    margin-right: 5px;
+}
+
+button{
+    cursor: pointer;
+    background-color: rgb(233, 158, 19);
+    font-family: 'Rubik', sans-serif;
+    color: white;
+    padding: 5px;
+    padding-inline: 7px;
+    border-radius: 5px;
+    font-size: 14px;
+    /* border: solid orange 2px; */
+    margin-left: 8px;
+}
+
+button:hover{
+    background-color: rgb(200, 130, 0);
+}
+
+.connectButton{
+    cursor: pointer;
+    background-color: rgb(233, 158, 19);
+    font-family: 'Rubik', sans-serif;
+    color: white;
+    padding: 5px;
+    padding-inline: 7px;
+    border-radius: 5px;
+    font-size: 14px;
+    box-shadow: 0px 2px 1px 0px #000,
+            2px 0px 0px 0px #000,
+            0px -1px 0px 0px rgb(62, 62, 62),
+            -1px 0px 0px 0px rgb(62, 62, 62);
+}
+
+.connectButton:hover{
+    background-color: rgb(200, 130, 0);
 }

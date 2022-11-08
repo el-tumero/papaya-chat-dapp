@@ -3,6 +3,7 @@ import React, { SetStateAction, useEffect, useState } from "react"
 import axios from "axios"
 import Cookies from "universal-cookie"
 import "./RelationList.css"
+import Relations from "./Relations"
 
 interface Props{
     storageContract: ethers.Contract | undefined
@@ -17,7 +18,9 @@ function RelationList({storageContract, profileContract, signer, setReceiver, se
     const [newRelationAddress, setNewRelationAddress] = useState<string>()
     const [cookiesClient] = useState<Cookies>(new Cookies())
     const [relations, setRelations] = useState<string[]>()
-    
+    const [profiles, setProfiles] = useState<{[key: string]: {name:string, bio:string, photo:string, online:boolean}}>()
+    const [onlineStatusChecked, setOnlineStatusChecked] = useState<boolean>(false)
+
     const ipfsGateway = "https://ipfs.io/ipfs/"
 
     useEffect(() => {
@@ -28,33 +31,36 @@ function RelationList({storageContract, profileContract, signer, setReceiver, se
 
     }, [relations, cookiesClient])
 
-    function Relations(){
-        if(relations){
-
-            const profiles:{[key: string]: {name:string, bio:string, photo:string}} = {}
-
+    useEffect(() => {
+        const _profiles:{[key: string]: {name:string, bio:string, photo:string, online:boolean}} = {}
+        if(relations && !profiles ){
             relations.forEach(relation => {
                 const data = localStorage.getItem(relation)
                 if(data){
-                    profiles[relation] = JSON.parse(data)
+                    _profiles[relation] = JSON.parse(data)
+                    _profiles[relation].online = false
                 }
-                
             })
+            setProfiles(_profiles) 
 
-            return(
-                <div>
-                    {relations.map((value, index) => <div className="relation" key={index}>
-                        {value}
-                        <p className="name">{profiles[value].name}</p>
-                        <img src={profiles[value].photo} width={50} />
-                        <br />
-                        <button onClick={() => setReceiver(value.toLowerCase())}>Connect!</button>
-                        </div>)}
-                </div>
-            )
         }
-        return(<div></div>)
-    }
+
+        if(profiles && !onlineStatusChecked){
+            axios.get(process.env.REACT_APP_SERVER_URL+"/online").then(response => {
+                const onlineList = response.data as string[]
+                onlineList.forEach(onlineAddress => {
+                    if(profiles[onlineAddress]) {
+                        // console.log(profiles[onlineAddress])
+                        setProfiles(prev => ({...prev, [onlineAddress]: {...prev![onlineAddress], online: true }}))
+                        setOnlineStatusChecked(true)
+                    }
+                })
+            })
+        }
+        
+    }, [profiles, relations, onlineStatusChecked])
+
+    
 
     async function addNewRelation(){
         if(storageContract && profileContract && newRelationAddress && signer){
@@ -71,6 +77,8 @@ function RelationList({storageContract, profileContract, signer, setReceiver, se
                 localStorage.setItem("p"+newRelationAddress.toLowerCase(), result)
 
                 const profileCid = await profileContract.activeProfile(newRelationAddress)
+
+                console.log(profileCid)
 
                 const response = await axios.get(ipfsGateway + profileCid)
                 const profile = response.data
@@ -95,7 +103,12 @@ function RelationList({storageContract, profileContract, signer, setReceiver, se
                 cookies.set("relations", [...relations, newRelationAddress.toLowerCase()])
                 setRelations(current => [...current!, newRelationAddress.toLowerCase()])
 
-            } catch (error) {
+            } catch (error:any) {
+                if(error.code === "CALL_EXCEPTION") {
+                    alert("Given address did not create a profile :(")
+                    return
+                }
+                alert(error)
                 console.error(error)
             }
         }
@@ -103,12 +116,13 @@ function RelationList({storageContract, profileContract, signer, setReceiver, se
     }
 
     return(
-        <div>
-            <button onClick={() => setOpenKeyPairScreen(true)}>Options</button>
+        <div className="container">
+            <div className="optionsButton"><small className="optionsText" onClick={() => setOpenKeyPairScreen(true)}>options</small></div>
+            <h2 className="relationsTitle">Relations</h2>
             <p>Add relation:</p>
-            <input placeholder="address" onChange={e => setNewRelationAddress(e.target.value)}/>
+            <input type="text" placeholder="address" onChange={e => setNewRelationAddress(e.target.value)}/>
             <button onClick={addNewRelation}>Add</button>
-            <Relations />
+            <Relations relations={relations} profiles={profiles} setReceiver={setReceiver} />
         </div>
     )
 }

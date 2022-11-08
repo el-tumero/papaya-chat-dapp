@@ -178,7 +178,7 @@ function App() {
           <ConnectWalletButton setAccount={setAccount} setSigner={setSigner} setSocket={setSocket}></ConnectWalletButton>
         }
         {(isLogged && openKeyPairScreen) &&
-          <KeyPair signer={signer} storageContract={storageContract} profileContract={profileContract} setOpenKeyPairScreen={setOpenKeyPairScreen} />
+          <KeyPair signer={signer} storageContract={storageContract} profileContract={profileContract} setOpenKeyPairScreen={setOpenKeyPairScreen} isAccountInitialized={isAccountInitialized} />
         }
         
       </header>
