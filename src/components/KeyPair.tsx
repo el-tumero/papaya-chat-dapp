@@ -36,7 +36,6 @@ function KeyPair({signer, storageContract, profileContract, setOpenKeyPairScreen
     const [currentProfile, setCurrentProfile] = useState<Profile>()
 
 
-    // const ipfsServiceUrl = "http://localhost:8000"
     const ipfsGateway = "https://ipfs.io/ipfs/"
 
     useEffect(() => {

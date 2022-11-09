@@ -17,6 +17,8 @@ import decryptMessage from './utils/decryptMessage';
 import axios from 'axios';
 import deriveSecretKey from './utils/deriveSecretKey';
 import jwkToCryptoKey from './utils/jwkToCryptoKey';
+import PapayaLogo from "./icons/papaya-logo.svg"
+import Emotes from './components/Emotes/Emotes';
 
 interface IMessageDataContentAsObject extends Omit<IMessageData, "content">{
   content: {type: string, data:number[]}
@@ -34,6 +36,7 @@ function App() {
   const [socket, setSocket] = useState<Socket>()
   const [messageDb, setMessageDb] = useState<IMessageDataDb>({})
   const [openKeyPairScreen, setOpenKeyPairScreen] = useState<boolean>(false)
+  const [openEmotesScreen, setOpenEmotesScreen] = useState<boolean>(false)
 
   const [lastMessageAddress, setLastMessageAddress] = useState<string[]>([])
 
@@ -41,7 +44,7 @@ function App() {
 
   useEffect(() => {
     if( (document.hidden || receiver !== lastMessageAddress[0]) && lastMessageAddress[0] ){
-      new Notification("New message", {body: lastMessageAddress[0] + " send you a message!"})
+      new Notification("New message", {body: lastMessageAddress[0] + " send you a message!", icon: PapayaLogo})
       setLastMessageAddress([])
     }
   }, [lastMessageAddress, receiver])
@@ -168,8 +171,8 @@ function App() {
   return (
       <div className="App">
       <header className="App-header">
-        {(!openKeyPairScreen && isLogged && !receiver) &&
-          <RelationList signer={signer} storageContract={storageContract} profileContract={profileContract} setReceiver={setReceiver} setOpenKeyPairScreen={setOpenKeyPairScreen} />
+        {(!openKeyPairScreen && !openEmotesScreen && isLogged && !receiver) &&
+          <RelationList signer={signer} storageContract={storageContract} profileContract={profileContract} setReceiver={setReceiver} setOpenKeyPairScreen={setOpenKeyPairScreen} setOpenEmotesScreen={setOpenEmotesScreen} />
         }
         {receiver &&
           <MessageBox senderAddress={account} receiverAddress={receiver} setReceiver={setReceiver} contract={storageContract} socket={socket} messageDb={messageDb} />
@@ -179,6 +182,9 @@ function App() {
         }
         {(isLogged && openKeyPairScreen) &&
           <KeyPair signer={signer} storageContract={storageContract} profileContract={profileContract} setOpenKeyPairScreen={setOpenKeyPairScreen} isAccountInitialized={isAccountInitialized} />
+        }
+        {(isLogged && openEmotesScreen) && 
+          <Emotes setOpenEmotesScreen={setOpenEmotesScreen} /> 
         }
         
       </header>

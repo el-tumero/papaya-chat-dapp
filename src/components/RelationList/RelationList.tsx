@@ -12,9 +12,10 @@ interface Props{
     signer: ethers.Signer | undefined
     setReceiver: React.Dispatch<SetStateAction<string | undefined>>
     setOpenKeyPairScreen: React.Dispatch<SetStateAction<boolean>>
+    setOpenEmotesScreen: React.Dispatch<SetStateAction<boolean>>
 }
 
-function RelationList({storageContract, profileContract, signer, setReceiver, setOpenKeyPairScreen}: Props){
+function RelationList({storageContract, profileContract, signer, setReceiver, setOpenKeyPairScreen, setOpenEmotesScreen}: Props){
 
     const [newRelationAddress, setNewRelationAddress] = useState<string>()
     const [cookiesClient] = useState<Cookies>(new Cookies())
@@ -162,7 +163,10 @@ function RelationList({storageContract, profileContract, signer, setReceiver, se
         <div className="container">
             
             <div className="topBar">
-                <small className="optionsText" onClick={() => setOpenKeyPairScreen(true)}>options</small>
+                <div className="menuButtons">
+                    <small className="optionsText" onClick={() => setOpenKeyPairScreen(true)}>options</small>
+                    <small className="emotesText" onClick={() => setOpenEmotesScreen(true)} >emotes</small>
+                </div>
                 <div className="logoContainer">
                     <small>papaya</small>
                     <img src={PapayaLogo} width={32} alt="papayalogo" />

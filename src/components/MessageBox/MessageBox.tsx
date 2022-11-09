@@ -10,6 +10,8 @@ import getPublicKeyFromBlockchain from "../../utils/getPublicKeyFromBlockchain"
 import IMessageDataDb from "../../types/IMessageDataDb"
 import deriveSecretKey from "../../utils/deriveSecretKey"
 import encryptMessage from "../../utils/encryptMessage"
+import axios from "axios"
+import EmoteImage from "./EmoteImage"
 
 
 interface Props{
@@ -98,16 +100,30 @@ function MessageBox({senderAddress, receiverAddress, contract, setReceiver, sock
 
         // setSenderMessages(current => [...current, {content: typedMessage, timestamp: Date.now()}])
 
+        setLastMessage(typedMessage)
+
+        let msg = typedMessage
+
+        if(typedMessage[0] === "!" && typedMessage[1] === "!"){
+            const emoteName = typedMessage.substring(2)
+            const cid = localStorage.getItem(emoteName)
+            if(cid){
+                msg = "!!"+cid
+            }else{
+                msg = emoteName
+            }
+        }
+
         const sentMessagesHistory = localStorage.getItem("c"+receiverAddress)
         if(sentMessagesHistory){
             const sentMessagesHistoryObj = JSON.parse(sentMessagesHistory)
-            localStorage.setItem("c"+receiverAddress, JSON.stringify([...sentMessagesHistoryObj, {content: typedMessage, timestamp: Date.now()}]))
+            localStorage.setItem("c"+receiverAddress, JSON.stringify([...sentMessagesHistoryObj, {content: msg, timestamp: Date.now()}]))
         }
 
-        setLastMessage(typedMessage)
+        
 
         const enc = new TextEncoder()
-        const encodedMessage = enc.encode(typedMessage)
+        const encodedMessage = enc.encode(msg)
 
         const pair = await getKeyPairFromDatabase()
 
@@ -134,12 +150,14 @@ function MessageBox({senderAddress, receiverAddress, contract, setReceiver, sock
        
     }
 
+   
+
     return(
         <div className="messageBoxContainer">
             <p className="text">Sending messages as {senderAddress}</p>
             <p className="text">To: {receiverAddress}</p>
             <div className="messages">
-                {messages.map((message, index) => (<p className="message" key={index}>{message.me ? <b style={{color: "green"}} >me: </b> : "mate: " }{message.content}</p>))}
+                {messages.map((message, index) => (<p className="message" key={index}>{message.me ? <b style={{color: "green"}} >me: </b> : "mate: " }{ message.content.substring(0, 2) === "!!" ? <EmoteImage cid={message.content.substring(2)}></EmoteImage> : message.content}</p>))}
                 <div ref={bottomRef}></div>
             </div>
             <div>

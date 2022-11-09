@@ -21,7 +21,12 @@
 
 }
 
-.topBar .optionsText{
+.topBar .menuButtons{
+    display: flex;
+    gap: 10px;
+}
+
+.topBar .menuButtons .optionsText{
     user-select: none;
     cursor: pointer;
     background-color: rgb(86, 86, 86);
@@ -31,6 +36,27 @@
     padding-inline: 5px;
 }
 
+.topBar .menuButtons .optionsText:hover{
+    background-color: rgb(50, 50, 50);
+}
+
+.topBar .menuButtons .emotesText{
+    user-select: none;
+    cursor: pointer;
+    background-color: rgb(86, 86, 86);
+    border-radius: 5px;
+    /* padding: 3px; */
+    padding-block: 3px;
+    padding-inline: 5px;
+}
+
+.topBar .menuButtons .emotesText:hover{
+    background-color: rgb(50, 50, 50);
+}
+
+
+
+
 .topBar .logoContainer{
 
     display: flex;
@@ -39,9 +65,7 @@
     font-family: 'Rubik', sans-serif;
 }
 
-.optionsButton .optionsText:hover{
-    background-color: rgb(50, 50, 50);
-}
+
 
 .relationsTitle{
     margin:0;
