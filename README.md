@@ -13,6 +13,8 @@ Papaya Chat is the chat app that uses decentralized solutions. Made by [el-tumer
 
 App is using browser's Notification API so to receive notifications I recommend turning it on permision request.
 
+Live demo available at: [https://el-tumero.github.io/papaya-chat-dapp/](https://el-tumero.github.io/papaya-chat-dapp/)
+
 Demo: [https://www.youtube.com/watch?v=UG8eZO9La94](https://www.youtube.com/watch?v=UG8eZO9La94)
 
 ### How it works?
