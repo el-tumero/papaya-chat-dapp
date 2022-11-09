@@ -9,7 +9,7 @@ Papaya Chat is the chat app that uses decentralized solutions. Made by [el-tumer
 
 ### Usage and demo
 
-upcoming
+Demo: [https://www.youtube.com/watch?v=UG8eZO9La94](https://www.youtube.com/watch?v=UG8eZO9La94)
 
 ### How it works?
 
@@ -134,7 +134,7 @@ The presented diagrams in a simplified way show the operation of the application
                 const cookies = cookiesClient
 ```
 
-- Uploading custom emote [src/components/Emotes/Emotes.tsx](/src/components/Emotes/Emotes.tsx#L74)
+- Uploading custom emote to IPFS [src/components/Emotes/Emotes.tsx](/src/components/Emotes/Emotes.tsx#L74)
 
 ```ts
                const acceptedImageTypes = ['image/jpeg', 'image/png']
@@ -147,7 +147,7 @@ The presented diagrams in a simplified way show the operation of the application
                 const cid = await ipfsClient.storeBlob(emoteObj)
 ```
 
-- Donwloading custom emotes [src/components/MessageBox/EmoteImage.tsx](/src/components/MessageBox/EmoteImage.tsx#L4)
+- Donwloading custom emotes from IPFS [src/components/MessageBox/EmoteImage.tsx](/src/components/MessageBox/EmoteImage.tsx#L4)
 
 ```ts
                 async function getEmoteImage(cid:string){

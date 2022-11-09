@@ -1,6 +1,7 @@
 {
   "name": "papaya-web",
   "version": "0.1.0",
+  "homepage": "https://el-tumero.github.io/papaya-chat-dapp",
   "private": true,
   "dependencies": {
     "@babel/core": "^7.16.0",
@@ -75,6 +76,8 @@
     "workbox-webpack-plugin": "^6.4.1"
   },
   "scripts": {
+    "predeploy": "yarn build",
+    "deploy": "gh-pages -d build",
     "start": "node ./scripts/start.js",
     "build": "node ./scripts/build.js",
     "test": "node ./scripts/test.js"
@@ -164,6 +167,7 @@
     "@types/mocha": "^10.0.0",
     "@types/node-forge": "^1.3.0",
     "chai": "^4.3.6",
+    "gh-pages": "^4.0.0",
     "hardhat": "^2.12.1",
     "hardhat-gas-reporter": "^1.0.9",
     "solidity-coverage": "^0.8.2",
