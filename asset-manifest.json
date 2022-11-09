@@ -1,0 +1,16 @@
+{
+  "files": {
+    "main.css": "/papaya-chat-dapp/static/css/main.8a348359.css",
+    "main.js": "/papaya-chat-dapp/static/js/main.b68bc04f.js",
+    "static/js/107.5aa427ba.chunk.js": "/papaya-chat-dapp/static/js/107.5aa427ba.chunk.js",
+    "static/media/papaya-logo.svg": "/papaya-chat-dapp/static/media/papaya-logo.58b535aedb7ca0619ce64552f9639352.svg",
+    "index.html": "/papaya-chat-dapp/index.html",
+    "main.8a348359.css.map": "/papaya-chat-dapp/static/css/main.8a348359.css.map",
+    "main.b68bc04f.js.map": "/papaya-chat-dapp/static/js/main.b68bc04f.js.map",
+    "107.5aa427ba.chunk.js.map": "/papaya-chat-dapp/static/js/107.5aa427ba.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.8a348359.css",
+    "static/js/main.b68bc04f.js"
+  ]
+}
