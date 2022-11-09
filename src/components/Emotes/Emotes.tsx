@@ -110,12 +110,14 @@ export default function Emotes({setOpenEmotesScreen}:Props){
         <div className="goBackButton"><small className="goBackText" onClick={() => setOpenEmotesScreen(false)}>← go back</small></div>
         <h2 className="emotesTitle">Emotes</h2>
         <h5>Upload your emote:  <ShowIcon state={uploadedState}></ShowIcon></h5>
-        <input type="text" onChange={e => setEmoteCommand(e.target.value)} placeholder="command"/>
+        <p style={{fontSize: 15}}>Once your emote has been uploaded you can use it (in chat) by typing <b>!!</b><i>emote_name </i></p>
+        <input type="text" onChange={e => setEmoteCommand(e.target.value)} placeholder="emote name"/>
         <input type="file" onChange={e => setSelectedFile(e.target.files![0])} />
         <button onClick={uploadEmote}>Upload</button>
        
         <h5>Your emotes: <ShowIcon state={yourEmotesState}></ShowIcon></h5>
-        
-        {emotesData && emotesData.map((value, index) => (<div className="emoteRecord" key={index}><small>{value.command}</small><img src={value.image} alt="emoteImage" /></div>))}
+        <div className="emoteRecordsContainer">
+            {emotesData && emotesData.map((value, index) => (<div className="emoteRecord" key={index}><small>{value.command}</small><img src={value.image} alt="emoteImage" /></div>))}
+        </div>
     </div>
 }

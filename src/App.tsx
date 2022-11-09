@@ -39,8 +39,7 @@ function App() {
   const [openEmotesScreen, setOpenEmotesScreen] = useState<boolean>(false)
 
   const [lastMessageAddress, setLastMessageAddress] = useState<string[]>([])
-
-  const serverUrl = process.env.REACT_APP_SERVER_URL
+  const [serverUrl, setServerUrl] = useState<string>(process.env.REACT_APP_SERVER_URL)
 
   useEffect(() => {
     if( (document.hidden || receiver !== lastMessageAddress[0]) && lastMessageAddress[0] ){
@@ -172,13 +171,17 @@ function App() {
       <div className="App">
       <header className="App-header">
         {(!openKeyPairScreen && !openEmotesScreen && isLogged && !receiver) &&
-          <RelationList signer={signer} storageContract={storageContract} profileContract={profileContract} setReceiver={setReceiver} setOpenKeyPairScreen={setOpenKeyPairScreen} setOpenEmotesScreen={setOpenEmotesScreen} />
+          <RelationList signer={signer} storageContract={storageContract} profileContract={profileContract} setReceiver={setReceiver} setOpenKeyPairScreen={setOpenKeyPairScreen} setOpenEmotesScreen={setOpenEmotesScreen} serverUrl={serverUrl} />
         }
         {receiver &&
           <MessageBox senderAddress={account} receiverAddress={receiver} setReceiver={setReceiver} contract={storageContract} socket={socket} messageDb={messageDb} />
         }
         {!isLogged &&
-          <ConnectWalletButton setAccount={setAccount} setSigner={setSigner} setSocket={setSocket}></ConnectWalletButton>
+          <div>
+            <ConnectWalletButton setAccount={setAccount} setSigner={setSigner} setSocket={setSocket} serverUrl={serverUrl}></ConnectWalletButton>
+            <br />
+            <input type="text" placeholder='serverUrl' style={{width: 250, textAlign: "center"}} value={serverUrl} onChange={e => setServerUrl(e.target.value)} />
+          </div>
         }
         {(isLogged && openKeyPairScreen) &&
           <KeyPair signer={signer} storageContract={storageContract} profileContract={profileContract} setOpenKeyPairScreen={setOpenKeyPairScreen} isAccountInitialized={isAccountInitialized} />

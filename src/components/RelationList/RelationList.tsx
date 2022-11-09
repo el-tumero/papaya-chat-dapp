@@ -13,9 +13,10 @@ interface Props{
     setReceiver: React.Dispatch<SetStateAction<string | undefined>>
     setOpenKeyPairScreen: React.Dispatch<SetStateAction<boolean>>
     setOpenEmotesScreen: React.Dispatch<SetStateAction<boolean>>
+    serverUrl: string
 }
 
-function RelationList({storageContract, profileContract, signer, setReceiver, setOpenKeyPairScreen, setOpenEmotesScreen}: Props){
+function RelationList({storageContract, profileContract, signer, setReceiver, setOpenKeyPairScreen, setOpenEmotesScreen, serverUrl}: Props){
 
     const [newRelationAddress, setNewRelationAddress] = useState<string>()
     const [cookiesClient] = useState<Cookies>(new Cookies())
@@ -53,7 +54,7 @@ function RelationList({storageContract, profileContract, signer, setReceiver, se
         }
 
         if(profiles && !onlineStatusChecked){
-            axios.get(process.env.REACT_APP_SERVER_URL+"/online").then(response => {
+            axios.get(serverUrl+"/online").then(response => {
                 const onlineList = response.data as string[]
                 onlineList.forEach(onlineAddress => {
                     if(profiles[onlineAddress]) {

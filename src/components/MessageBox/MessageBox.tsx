@@ -12,6 +12,7 @@ import deriveSecretKey from "../../utils/deriveSecretKey"
 import encryptMessage from "../../utils/encryptMessage"
 import axios from "axios"
 import EmoteImage from "./EmoteImage"
+import { clear } from "console"
 
 
 interface Props{
@@ -150,6 +151,11 @@ function MessageBox({senderAddress, receiverAddress, contract, setReceiver, sock
        
     }
 
+    function clear(){
+        localStorage.setItem("c"+receiverAddress, JSON.stringify([]))
+        setLastMessage("")
+    }
+
    
 
     return(
@@ -161,8 +167,9 @@ function MessageBox({senderAddress, receiverAddress, contract, setReceiver, sock
                 <div ref={bottomRef}></div>
             </div>
             <div>
-                <input type="text" className="input" ref={inputRef} onChange={e => setTypedMessage(e.target.value)} onKeyDown={e => { if(e.key === "Enter") sendMessage() }} />
+                <input type="text"  className="input" ref={inputRef} onChange={e => setTypedMessage(e.target.value)} onKeyDown={e => { if(e.key === "Enter") sendMessage() }} />
                 <button className="sendButton" onClick={() => { sendMessage() }}>Send</button>
+                <button className="clear" onClick={() => clear()}>Clear</button>
                 <button onClick={() => setReceiver(undefined)}>Close</button>
             </div>
             

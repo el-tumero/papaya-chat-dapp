@@ -15,11 +15,10 @@ interface Props {
   setAccount: React.Dispatch<SetStateAction<string | undefined>>
   setSigner: React.Dispatch<SetStateAction<Signer | undefined>>
   setSocket: React.Dispatch<SetStateAction<Socket | undefined>>
+  serverUrl: string
 }
 
-const serverUrl = process.env.REACT_APP_SERVER_URL
-
-function ConnectWalletButton({setAccount, setSigner, setSocket}:Props) {
+function ConnectWalletButton({setAccount, setSigner, setSocket, serverUrl}:Props) {
 
   async function handleClick(){
     if(window.ethereum){
