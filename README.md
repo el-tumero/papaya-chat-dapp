@@ -5,9 +5,13 @@
 
 ## Project Description
 
-Papaya Chat is the chat app that uses decentralized solutions. Made by [el-tumero](https://github.com/el-tumero) (tumerpl@gmail.com). The purpose of the application is to create safe place for online conversations. This safety comes from encryption and storing user data (username, photo, bio) on blockchain and IPFS. Smart contracts are deployed on Binance Smartchain Testnet.
+Papaya Chat is the chat app that uses decentralized solutions. Made by [el-tumero](https://github.com/el-tumero) (tumerpl@gmail.com). The purpose of the application is to create safe place for online conversations. This safety comes from encryption and storing user data (username, photo, bio) on blockchain and IPFS. Smart contracts are deployed on Binance Smartchain Testnet
+(PapayaStorage: 0x5f030595035C3AAdb884260e72Ae5A2ece2c5D8F)
+(PapayaProfile: 0xBB333CDDBd113b3D2dC7CF207384Efd0a70F8Cb5)
 
 ### Usage and demo
+
+App is using browser's Notification API so to receive notifications I recommend turning it on permision request.
 
 Demo: [https://www.youtube.com/watch?v=UG8eZO9La94](https://www.youtube.com/watch?v=UG8eZO9La94)
 
