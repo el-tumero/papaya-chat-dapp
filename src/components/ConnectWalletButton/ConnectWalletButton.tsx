@@ -64,8 +64,10 @@ function ConnectWalletButton({setAccount, setSigner, setSocket}:Props) {
       } catch (error:any) {
           console.error(error)
           if(error.code === 4001) console.log("Rejected ;(")
+          alert(error)
       }
   } else {
+      alert("No wallet installed!")
       console.log("No wallet installed!")
   }
   }

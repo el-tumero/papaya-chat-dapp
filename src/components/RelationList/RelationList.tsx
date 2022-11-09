@@ -4,6 +4,7 @@ import axios from "axios"
 import Cookies from "universal-cookie"
 import "./RelationList.css"
 import Relations from "./Relations"
+import PapayaLogo from "../../icons/papaya-logo.svg"
 
 interface Props{
     storageContract: ethers.Contract | undefined
@@ -20,18 +21,21 @@ function RelationList({storageContract, profileContract, signer, setReceiver, se
     const [relations, setRelations] = useState<string[]>()
     const [profiles, setProfiles] = useState<{[key: string]: {name:string, bio:string, photo:string, online:boolean}}>()
     const [onlineStatusChecked, setOnlineStatusChecked] = useState<boolean>(false)
+    const [firstRun, setFirstRun] = useState<boolean>(true)
 
     const ipfsGateway = "https://ipfs.io/ipfs/"
 
     useEffect(() => {
-        if(!relations && cookiesClient){
+        if(!relations && cookiesClient && firstRun){
             const result = cookiesClient.get("relations")
             setRelations(result)
+            setFirstRun(false)
         }
 
-    }, [relations, cookiesClient])
+    }, [relations, cookiesClient, firstRun])
 
     useEffect(() => {
+        // console.log("#change")
         const _profiles:{[key: string]: {name:string, bio:string, photo:string, online:boolean}} = {}
         if(relations && !profiles ){
             relations.forEach(relation => {
@@ -41,7 +45,9 @@ function RelationList({storageContract, profileContract, signer, setReceiver, se
                     _profiles[relation].online = false
                 }
             })
+            console.log("profiles set")
             setProfiles(_profiles) 
+            setOnlineStatusChecked(false)
 
         }
 
@@ -60,6 +66,41 @@ function RelationList({storageContract, profileContract, signer, setReceiver, se
         
     }, [profiles, relations, onlineStatusChecked])
 
+    async function refreshRelations() {
+
+        async function refresh(relation:string){
+            try {
+                const result = await storageContract?.getPublicKey(relation)
+                if(result.length === 0) {
+                    throw Error("Current address has not created an account on this service :(")
+                }
+                localStorage.setItem("p"+relation.toLowerCase(), result)
+
+                const profileCid = await profileContract?.activeProfile(relation)
+
+                const response = await axios.get(ipfsGateway + profileCid)
+                const profile = response.data
+
+                localStorage.setItem(relation.toLowerCase(), JSON.stringify(profile))
+
+                setRelations(prev => prev ? [...prev, relation] : [relation])
+
+            } catch (error) {
+                console.error(error)   
+            }   
+        }
+
+        
+        if(relations){
+            setRelations(undefined)
+            setProfiles(undefined)
+            const relationsC = cookiesClient.get("relations") as string[]
+            const refreshPromises = relationsC.map(address => refresh(address))
+
+            await Promise.all(refreshPromises)
+        }
+        
+    }
     
 
     async function addNewRelation(){
@@ -78,7 +119,7 @@ function RelationList({storageContract, profileContract, signer, setReceiver, se
 
                 const profileCid = await profileContract.activeProfile(newRelationAddress)
 
-                console.log(profileCid)
+                //console.log(profileCid)
 
                 const response = await axios.get(ipfsGateway + profileCid)
                 const profile = response.data
@@ -86,9 +127,11 @@ function RelationList({storageContract, profileContract, signer, setReceiver, se
                 localStorage.setItem(newRelationAddress.toLowerCase(), JSON.stringify(profile))
                 const cookies = cookiesClient
 
+                
+
                 const relations = cookies.get("relations") as string[]
                 if(!relations){
-                    cookies.set("relations", [newRelationAddress.toLowerCase()])
+                    cookies.set("relations", [newRelationAddress.toLowerCase()], {expires: new Date(2147483647 * 1000)})
                     console.log("New relation added!")
                     setRelations([newRelationAddress.toLowerCase()])
                     return
@@ -97,7 +140,7 @@ function RelationList({storageContract, profileContract, signer, setReceiver, se
                 const found = relations.find(element => element === newRelationAddress.toLowerCase())
 
                 if(found){
-                    throw Error("Relation is already created!")
+                    throw Error("Relation is already created! ")
                 }
 
                 cookies.set("relations", [...relations, newRelationAddress.toLowerCase()])
@@ -117,11 +160,20 @@ function RelationList({storageContract, profileContract, signer, setReceiver, se
 
     return(
         <div className="container">
-            <div className="optionsButton"><small className="optionsText" onClick={() => setOpenKeyPairScreen(true)}>options</small></div>
+            
+            <div className="topBar">
+                <small className="optionsText" onClick={() => setOpenKeyPairScreen(true)}>options</small>
+                <div className="logoContainer">
+                    <small>papaya</small>
+                    <img src={PapayaLogo} width={32} alt="papayalogo" />
+                </div>
+                
+            </div>
             <h2 className="relationsTitle">Relations</h2>
             <p>Add relation:</p>
             <input type="text" placeholder="address" onChange={e => setNewRelationAddress(e.target.value)}/>
             <button onClick={addNewRelation}>Add</button>
+            <button onClick={refreshRelations}>Refresh</button>
             <Relations relations={relations} profiles={profiles} setReceiver={setReceiver} />
         </div>
     )
