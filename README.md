@@ -15,6 +15,8 @@ App is using browser's Notification API so to receive notifications I recommend 
 
 Live demo available at: [https://el-tumero.github.io/papaya-chat-dapp/](https://el-tumero.github.io/papaya-chat-dapp/)
 
+(Custom emotes should be 32x32 pixel png images)
+
 Demo: [https://www.youtube.com/watch?v=UG8eZO9La94](https://www.youtube.com/watch?v=UG8eZO9La94)
 
 ### How it works?
